@@ -2,3 +2,9 @@
 >type,common
 
 #include "mp_mod.class"
+
+localize,mod
+
+scriptparsetree,scripts/mp/gametypes/oic.gsc
+scriptparsetree,scripts/mp/gametypes/oic.csc
+rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg

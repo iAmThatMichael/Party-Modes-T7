@@ -1,0 +1,7 @@
+index,type,name,resident,streamed,parentStack
+1,string,,0,0,||assetlist
+2,localize,MOD_OBJECTIVES_OIC,47,0,||assetlist
+3,localize,MOD_OBJECTIVES_OIC_HINT,41,0,||assetlist
+4,localize,MOD_OBJECTIVES_OIC_SCORE,25,0,||assetlist
+5,keyvaluepairs,en_mp_mod,585,0,||assetlist
+6,assetlist,,64,0,

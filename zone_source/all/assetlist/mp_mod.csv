@@ -1,0 +1,4 @@
+rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg
+scriptparsetree,scripts/mp/gametypes/oic.csc
+scriptparsetree,scripts/mp/gametypes/oic.gsc
+keyvaluepairs,mp_mod

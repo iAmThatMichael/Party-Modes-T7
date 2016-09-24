@@ -1,0 +1,14 @@
+VERSION			"1"
+CONFIG				"C:\projects\cod\t7\bin\StringEd.cfg"
+FILENOTES			""
+
+REFERENCE           	OBJECTIVES_OIC
+LANG_ENGLISH       	"Earn the most eliminations."
+
+REFERENCE           	OBJECTIVES_OIC_HINT
+LANG_ENGLISH        "Watch your back."
+
+REFERENCE           	OBJECTIVES_OIC_SCORE
+LANG_ENGLISH        "Earn the most eliminations."
+
+ENDMARKER
