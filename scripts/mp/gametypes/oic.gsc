@@ -225,7 +225,7 @@ function IsPlayerEliminated()
 
 function giveCustomLoadout()
 {
-	self thread testing();
+	self thread various_stuff();
 
 	self TakeAllWeapons();
 	self ClearPerks();
@@ -255,7 +255,7 @@ function giveCustomLoadout()
 	return weapon;
 }
 
-function testing()
+function various_stuff()
 {
 	self endon("death");
 	self endon("disconnect");
@@ -267,7 +267,7 @@ function testing()
 	{
 		WAIT_SERVER_FRAME;
 
-		if ( self UseButtonPressed() )
+		if ( self UseButtonPressed() && self AttackButtonPressed() )
 		{
 			bot = AddTestClient();
 			

@@ -1,11 +1,11 @@
 index,type,name,resident,streamed,parentStack
 1,string,,0,0,||assetlist
-2,scriptparsetree,scripts/mp/gametypes/oic.gsc,5793,0,|zone_source/mp_mod.zone|csv
-3,scriptparsetree,scripts/mp/gametypes/oic.csc,288,0,|zone_source/mp_mod.zone|csv
+2,scriptparsetree,scripts/mp/gametypes/oic.gsc,5833,0,|zone_source/mp_mod.zone|csv
+3,scriptparsetree,scripts/mp/gametypes/oic.csc,280,0,|zone_source/mp_mod.zone|csv
 4,rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg,652,0,|zone_source/mp_mod.zone|csv
-5,scriptparsetree,scripts/mp/gametypes/_globallogic_player.gsc,86564,0,|zone_source/mp_mod.zone|csv
-6,scriptparsetree,scripts/shared/callbacks_shared.gsc,12584,0,|zone_source/mp_mod.zone|csv
-7,rawfile,mod.cfg,24,0,|zone_source/mp_mod.zone|csv
+5,scriptparsetree,scripts/mp/gametypes/_globallogic_player.gsc,86672,0,|zone_source/mp_mod.zone|csv
+6,scriptparsetree,scripts/shared/callbacks_shared.gsc,12536,0,|zone_source/mp_mod.zone|csv
+7,rawfile,mod.cfg,12,0,|zone_source/mp_mod.zone|csv
 8,rawfile,cp_mod.cfg,16,0,|zone_source/mp_mod.zone|csv
 9,rawfile,mp_mod.cfg,107,0,|zone_source/mp_mod.zone|csv
 10,rawfile,zm_mod.cfg,21,0,|zone_source/mp_mod.zone|csv
