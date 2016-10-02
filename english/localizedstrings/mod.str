@@ -11,4 +11,13 @@ LANG_ENGLISH        "Watch your back."
 REFERENCE           	OBJECTIVES_OIC_SCORE
 LANG_ENGLISH        "Earn the most eliminations."
 
+REFERENCE           	OIC_PLAYER_KILLED
+LANG_ENGLISH        "Kill +1 bullet"
+
+REFERENCE           	OIC_PLAYER_ELIMINATED
+LANG_ENGLISH        "Eliminated player"
+
+REFERENCE           	OIC_PLAYER_SURVIVOR
+LANG_ENGLISH        "Survivor"
+
 ENDMARKER

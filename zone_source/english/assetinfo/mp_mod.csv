@@ -3,5 +3,8 @@ index,type,name,resident,streamed,parentStack
 2,localize,MOD_OBJECTIVES_OIC,47,0,||assetlist
 3,localize,MOD_OBJECTIVES_OIC_HINT,41,0,||assetlist
 4,localize,MOD_OBJECTIVES_OIC_SCORE,25,0,||assetlist
-5,keyvaluepairs,en_mp_mod,585,0,||assetlist
-6,assetlist,,64,0,
+5,localize,MOD_OIC_PLAYER_KILLED,37,0,||assetlist
+6,localize,MOD_OIC_PLAYER_ELIMINATED,44,0,||assetlist
+7,localize,MOD_OIC_PLAYER_SURVIVOR,33,0,||assetlist
+8,keyvaluepairs,en_mp_mod,583,0,||assetlist
+9,assetlist,,112,0,

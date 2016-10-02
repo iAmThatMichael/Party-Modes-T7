@@ -49,12 +49,9 @@
 				soldiertypeset	seals
 */
 
-/*QUAKED mp_dm_spawn (1.0 0.5 0.0) (-16 -16 0) (16 16 72)
-Players spawn away from enemies at one of these positions.*/
-
-#precache( "string", "MOD_OBJECTIVES_OIC" );
-#precache( "string", "MOD_OBJECTIVES_OIC_SCORE" );
-#precache( "string", "MOD_OBJECTIVES_OIC_HINT" );
+#precache("string", "MOD_OIC_PLAYER_KILLED");
+#precache("string", "MOD_OIC_PLAYER_ELIMINATED");
+#precache("string", "MOD_OIC_PLAYER_SURVIVOR");
 
 function main()
 {
@@ -67,12 +64,10 @@ function main()
 	util::registerNumLives( 0, 100 );
 
 	globallogic::registerFriendlyFireDelay( level.gameType, 0, 0, 1440 );
-
-	level.scoreRoundWinBased = ( GetGametypeSetting( "cumulativeRoundScores" ) == false );
-	level.teamScorePerKill = GetGametypeSetting( "teamScorePerKill" );
-	level.teamScorePerDeath = GetGametypeSetting( "teamScorePerDeath" );
-	level.teamScorePerHeadshot = GetGametypeSetting( "teamScorePerHeadshot" );
-	level.killstreaksGiveGameScore = GetGametypeSetting( "killstreaksGiveGameScore" );
+	// moved to GetDvarInt, GetGametypeSetting wasn't working
+	level.pointsPerWeaponKill = GetDvarInt( "pointsPerWeaponKill" );
+	level.pointsPerMeleeKill = GetDvarInt( "pointsPerMeleeKill" );
+	level.pointsForSurvivalBonus = GetDvarInt( "pointsForSurvivalBonus" );
 	
 	level.onStartGameType =&onStartGameType;
 	level.onPlayerDamage = &onPlayerDamage;
@@ -91,22 +86,21 @@ function main()
 
 function setupTeam( team )
 {
-	util::setObjectiveText( team, &"MOD_OBJECTIVES_OIC" );
+	util::setObjectiveText( team, &"OBJECTIVES_DM" );
 	if ( level.splitscreen )
 	{
-		util::setObjectiveScoreText( team, &"MOD_OBJECTIVES_OIC" );
+		util::setObjectiveScoreText( team, &"OBJECTIVES_DM" );
 	}
 	else
 	{
-		util::setObjectiveScoreText( team, &"MOD_OBJECTIVES_OIC_SCORE" );
+		util::setObjectiveScoreText( team, &"OBJECTIVES_DM_SCORE" );
 	}
-	util::setObjectiveHintText( team, &"MOD_OBJECTIVES_OIC_HINT" );
+	util::setObjectiveHintText( team, &"OBJECTIVES_DM_HINT" );
 
 	spawnlogic::add_spawn_points( team, "mp_dm_spawn" );
 	spawnlogic::place_spawn_points( "mp_dm_spawn_start" );
 	
 	level.spawn_start = spawnlogic::get_spawnpoint_array( "mp_dm_spawn_start" );
-
 }
 
 function onStartGameType()
@@ -133,12 +127,30 @@ function onStartGameType()
 	setDemoIntermissionPoint( spawnpoint.origin, spawnpoint.angles );
 	
 	level.displayRoundEndText = false;
-	
-	level thread onScoreCloseMusic();
 
 	if ( !util::isOneRound() )
 	{
 		level.displayRoundEndText = true;
+	}
+	
+	level thread watchElimination();
+}
+
+function watchElimination()
+{
+	level endon( "game_ended" );
+	
+	for ( ;; )
+	{
+		level waittill( "player_eliminated" );
+		foreach(player in level.players)
+		{
+			if ( IsDefined( player ) && ( IsAlive( player ) || !player IsPlayerEliminated() ) )
+			{				
+				player LUINotifyEvent( &"score_event", 3, &"MOD_OIC_PLAYER_SURVIVOR", 5, 0 );
+				player globallogic_score::givePointsToWin( level.pointsForSurvivalBonus );
+			}
+		}
 	}
 }
 
@@ -146,27 +158,6 @@ function onEndGame( winningPlayer )
 {
 	if ( IsDefined( winningPlayer ) && isPlayer( winningPlayer ) )
 		[[level._setPlayerScore]]( winningPlayer, winningPlayer [[level._getPlayerScore]]() + 1 );
-}
-
-function onScoreCloseMusic()
-{
-    while( !level.gameEnded )
-    {
-        scoreLimit = level.scoreLimit;
-	    scoreThreshold = scoreLimit * .9;
-        
-        for(i=0;i<level.players.size;i++)
-        {
-            scoreCheck = [[level._getPlayerScore]]( level.players[i] );
-            
-            if( scoreCheck >= scoreThreshold )
-            {
-                return;
-            }
-        }
-        
-        wait(.5);
-    }
 }
 
 function onSpawnPlayer(predictedSpawn)
@@ -177,6 +168,17 @@ function onSpawnPlayer(predictedSpawn)
 	}
 	
 	spawning::onSpawnPlayer(predictedSpawn);
+
+	lives = self.pers["lives"];
+
+	if(lives < 3)
+	{
+		str = " lives ";
+		if(lives == 2) // 1 life remaining
+			str = " life ";
+		str += "remaining";
+		self IPrintLnBold(lives - 1 + str);
+	}
 }
 
 function onPlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, sWeapon, vPoint, vDir, sHitLoc, psOffsetTime )
@@ -189,10 +191,36 @@ function onPlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath,
 
 function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, vDir, sHitLoc, psOffsetTime, deathAnimDuration )
 {
-	if ( !isPlayer( attacker ) || ( self == attacker ) )
-		return;
+	if ( isDefined( attacker ) && isPlayer( attacker ) && self != attacker )
+	{
+		attacker GiveAmmo( 1 );
+		attacker LUINotifyEvent( &"score_event", 3, &"MOD_OIC_PLAYER_KILLED", 5, 0 );
+		attacker PlayLocalSound( "wpn_ammo_pickup" );
 
-	[[level._setPlayerScore]]( attacker, [[level._getPlayerScore]]( attacker ) + 1 );	
+		if ( sMeansOfDeath == "MOD_MELEE" )
+		{
+			attacker globallogic_score::givePointsToWin( level.pointsPerMeleeKill );
+		}
+		else
+		{
+			attacker globallogic_score::givePointsToWin( level.pointsPerWeaponKill );			
+		}
+		
+		if(self.pers["lives"] == 0)
+			attacker LUINotifyEvent( &"score_event", 3, &"MOD_OIC_PLAYER_ELIMINATED", 5, 0 );
+	}
+}
+
+function GiveAmmo( amount )
+{		
+	currentWeapon = self GetCurrentWeapon();
+	clipAmmo = self GetWeaponAmmoClip( currentWeapon );
+	self SetWeaponAmmoClip( currentWeapon, clipAmmo + amount );
+}
+
+function IsPlayerEliminated()
+{
+	return (self.pers["lives"] == 0);
 }
 
 function giveCustomLoadout()
@@ -200,7 +228,7 @@ function giveCustomLoadout()
 	self thread testing();
 
 	self TakeAllWeapons();
-	self clearPerks();
+	self ClearPerks();
 
 	weapon = GetWeapon("pistol_standard");
 	self GiveWeapon( weapon );
@@ -221,6 +249,8 @@ function giveCustomLoadout()
 		self.pers["stock_ammo"] = undefined;
 	}
 	self SetWeaponAmmoStock( weapon, stockAmmo );
+
+	self.class_num = 0;
 
 	return weapon;
 }

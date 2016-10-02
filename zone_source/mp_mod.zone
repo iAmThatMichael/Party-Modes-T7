@@ -8,3 +8,11 @@ localize,mod
 scriptparsetree,scripts/mp/gametypes/oic.gsc
 scriptparsetree,scripts/mp/gametypes/oic.csc
 rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg
+
+scriptparsetree,scripts/mp/gametypes/_globallogic_player.gsc
+scriptparsetree,scripts/shared/callbacks_shared.gsc
+
+rawfile,mod.cfg
+rawfile,cp_mod.cfg
+rawfile,mp_mod.cfg
+rawfile,zm_mod.cfg
