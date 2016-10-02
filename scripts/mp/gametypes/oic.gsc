@@ -1,3 +1,5 @@
+#using scripts\shared\array_shared;
+#using scripts\shared\callbacks_shared;
 #using scripts\shared\gameobjects_shared;
 #using scripts\shared\math_shared;
 #using scripts\shared\util_shared;
@@ -74,6 +76,8 @@ function main()
 	level.onPlayerKilled =&onPlayerKilled;
 	level.onSpawnPlayer =&onSpawnPlayer;
 	level.giveCustomLoadout = &giveCustomLoadout;
+
+	//callback::on_connect( &on_player_connect ); // force teams on connecting
 	
 	gameobjects::register_allowed_gameobject( level.gameType );
 	
@@ -134,6 +138,26 @@ function onStartGameType()
 	}
 	
 	level thread watchElimination();
+	level thread watchEndGame();
+}
+
+function on_player_connect()
+{
+	// get our team selection based on if we got an infected game going
+	team = "free";
+	self.pers["team"] = team;
+	// moving to a built-in, still setting a team just in case.
+	self SetTeam( team );
+	// set this before to satisfy the spawnClient, need to fill in broken statement _globalloigc_spawn::836 
+	self.waitingToSpawn = true;
+	// something to satisfy matchRecordLogAdditionalDeathInfo 5th parameter (_globallogic_player)
+	self.class_num = 0;
+	// satisfy _loadout
+	self.class_num_for_global_weapons = 0;
+	// set the team
+	self [[level.teamMenu]](team);
+	// close the "Choose Class" menu
+	self CloseMenu( MENU_CHANGE_CLASS );
 }
 
 function watchElimination()
@@ -151,7 +175,40 @@ function watchElimination()
 				player globallogic_score::givePointsToWin( level.pointsForSurvivalBonus );
 			}
 		}
+		alive_players = GetAlivePlayers();
+		if(alive_players.size == 2)
+		{
+			foreach(player in alive_players)
+			{
+				SetTeamSpyplane( player.team, 1 );
+				util::set_team_radar( player.team, 1 );					
+			}
+		}
 	}
+}
+
+function watchEndGame()
+{
+	level waittill("game_ended");
+
+	IPrintLn("One in the Chamber brought to you by: DidUknowiPwn");
+	IPrintLn("YouTube: iPwnAtZombies, Twitter: CookiesAreLaw");
+	IPrintLn("Check out UGX-Mods.com for more mods!");
+
+}
+
+function GetAlivePlayers()
+{
+	level endon("game_ended");
+
+	players = [];
+	foreach(player in level.players)
+	{
+		if(!player IsPlayerEliminated())
+			array::add(players, player); 
+	}
+
+	return players;
 }
 
 function onEndGame( winningPlayer )
@@ -249,9 +306,7 @@ function giveCustomLoadout()
 		self.pers["stock_ammo"] = undefined;
 	}
 	self SetWeaponAmmoStock( weapon, stockAmmo );
-
 	self.class_num = 0;
-
 	return weapon;
 }
 
