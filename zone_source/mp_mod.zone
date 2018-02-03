@@ -22,8 +22,8 @@ scriptparsetree,scripts/mp/gametypes/oic.gsc
 scriptparsetree,scripts/mp/gametypes/shrp.csc
 scriptparsetree,scripts/mp/gametypes/shrp.gsc
 // --
-scriptparsetree,scripts/mp/gametypes/sns.csc
-scriptparsetree,scripts/mp/gametypes/sns.gsc
+scriptparsetree,scripts/mp/gametypes/sas.csc
+scriptparsetree,scripts/mp/gametypes/sas.gsc
 
 // Localization
 localize,mod
@@ -31,4 +31,4 @@ localize,mod
 // Rawfiles
 rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg
 rawfile,gamedata/gamesettings/mp/gamesettings_shrp.cfg
-rawfile,gamedata/gamesettings/mp/gamesettings_sns.cfg
+rawfile,gamedata/gamesettings/mp/gamesettings_sas.cfg
