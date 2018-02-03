@@ -6,3 +6,29 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 rawfile,dummy.cfg
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//  {T7ScriptSuite}
+scriptparsetree,scripts/m_shared/array_shared.gsc
+scriptparsetree,scripts/m_shared/lui_shared.gsc
+scriptparsetree,scripts/m_shared/math_shared.gsc
+scriptparsetree,scripts/m_shared/player_shared.gsc
+scriptparsetree,scripts/m_shared/trigger_shared.gsc
+scriptparsetree,scripts/m_shared/util_shared.gsc
+
+// Scripts
+scriptparsetree,scripts/mp/gametypes/oic.csc
+scriptparsetree,scripts/mp/gametypes/oic.gsc
+// --
+scriptparsetree,scripts/mp/gametypes/shrp.csc
+scriptparsetree,scripts/mp/gametypes/shrp.gsc
+// --
+scriptparsetree,scripts/mp/gametypes/sns.csc
+scriptparsetree,scripts/mp/gametypes/sns.gsc
+
+// Localization
+localize,mod
+
+// Rawfiles
+rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg
+rawfile,gamedata/gamesettings/mp/gamesettings_shrp.cfg
+rawfile,gamedata/gamesettings/mp/gamesettings_sns.cfg
