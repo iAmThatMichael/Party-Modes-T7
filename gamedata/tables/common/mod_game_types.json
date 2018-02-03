@@ -1,0 +1,22 @@
+{
+    "_meta": {},
+    "data": [
+        {
+            "comments": "Keep GameType Index Between 200 - 250 For Readability",
+            "id": 20,
+            "index": 201,
+            "session_mode": "mp",
+            "name": "tdm",
+            "name_ref": "MPUI_TEAM_DEATHMATCH",
+            "name_ref_caps": "MPUI_TEAM_DEATHMATCH_CAPS",
+            "hardcore_name_ref": "MPUI_HCTDM",
+            "description": "MENU_KILL_PLAYERS_ON_THE_OPPOSING",
+            "hardcore_available": "YES",
+            "is_team_based": "YES",
+            "groupname": "standard",
+            "image": "playlist_tdm",
+            "loading_screen_image": "t7_menu_mp_icons_gamemode_graphic_tdm",
+            "presence_ref": "PRESENCE_TDM"
+        }
+    ]
+}
