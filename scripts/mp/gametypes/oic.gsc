@@ -119,7 +119,7 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 	if ( !isPlayer( attacker ) || ( self == attacker ) )
 		return;
 
-	if ( weapon == level.oic_weapon && self.pers["clip_ammo"] < attacker.pers["clip_ammo"] )
+	if ( weapon == level.oic_weapon && attacker.pers["clip_ammo"] < self.pers["clip_ammo"] )
 		scoreevents::processScoreEvent( "kill_enemy_with_more_ammo_oic", attacker, self, weapon );
 
 	if ( weapon_utils::isMeleeMOD( sMeansOfDeath ) )
@@ -158,8 +158,6 @@ function give_ammo()
 	clipAmmo = self GetWeaponAmmoClip( level.oic_weapon ) + 1;
 	self SetWeaponAmmoClip( level.oic_weapon, clipAmmo );
 	self.pers["clip_ammo"] = clipAmmo;
-
-	self IPrintLn( "ammo: " + clipAmmo );
 }
 
 function giveCustomLoadout(first)
