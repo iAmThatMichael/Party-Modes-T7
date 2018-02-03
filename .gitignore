@@ -1,2 +1,4 @@
 
 scripts/m_shared
+zone/*
+zone_source/*
