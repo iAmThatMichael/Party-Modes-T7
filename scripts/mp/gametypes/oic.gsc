@@ -1,3 +1,4 @@
+#using scripts\shared\callbacks_shared;
 #using scripts\shared\gameobjects_shared;
 #using scripts\shared\math_shared;
 #using scripts\shared\util_shared;
@@ -6,12 +7,12 @@
 
 #using scripts\mp\gametypes\_globallogic;
 #using scripts\mp\gametypes\_globallogic_audio;
-#using scripts\mp\gametypes\_globallogic_score;
 #using scripts\mp\gametypes\_spawning;
 #using scripts\mp\gametypes\_spawnlogic;
-#using scripts\mp\killstreaks\_killstreaks;
 
 #using scripts\mp\_util;
+
+#using scripts\m_shared\util_shared;
 
 #precache( "string", "OBJECTIVES_DM" );
 #precache( "string", "OBJECTIVES_DM_SCORE" );
@@ -30,10 +31,14 @@ function main()
 	globallogic::registerFriendlyFireDelay( level.gameType, 0, 0, 1440 );
 
 	level.onStartGameType = &onStartGameType;
+	level.onPlayerDamage = &onPlayerDamage;
 	level.onPlayerKilled = &onPlayerKilled;
 	level.onSpawnPlayer = &onSpawnPlayer;
 	level.giveCustomLoadout = &giveCustomLoadout; // set up our loadout
+
 	level.forceAutoAssign = true; // force game to select team
+
+	callback::on_spawned( &on_player_spawned ); // extra code on spawning
 
 	gameobjects::register_allowed_gameobject( level.gameType );
 
@@ -42,7 +47,6 @@ function main()
 	// Sets the scoreboard columns and determines with data is sent across the network
 	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "stabs", "survived" );
 }
-
 
 function setupTeam( team )
 {
@@ -97,10 +101,28 @@ function onSpawnPlayer(predictedSpawn)
 	spawning::onSpawnPlayer(predictedSpawn);
 }
 
+function onPlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, sWeapon, vPoint, vDir, sHitLoc, psOffsetTime )
+{
+	// ensure damage is 1 hit
+	if ( sWeapon.rootWeapon.name == "pistol_m1911" )
+		iDamage = self.maxhealth + 1;
+
+	return iDamage;
+}
+
 function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, vDir, sHitLoc, psOffsetTime, deathAnimDuration )
 {
 	if ( !isPlayer( attacker ) || ( self == attacker ) )
 		return;
+
+	attacker PlayLocalSound( "mpl_oic_bullet_pickup" );
+}
+
+function on_player_spawned()
+{
+	/#
+	self thread m_util::spawn_bot_button();
+	#/
 }
 
 function giveCustomLoadout(first)
@@ -108,11 +130,16 @@ function giveCustomLoadout(first)
 	self TakeAllWeapons();
 	self ClearPerks();
 
-	spawn_weapon = GetWeapon( "pistol_standard" );
+	clipAmmo = 1;
+	SET_IF_DEFINED( clipAmmo, self.pers["clip_ammo"] );
+	stockAmmo = 0;
+	SET_IF_DEFINED( stockAmmo, self.pers["stock_ammo"] );
+
+	spawn_weapon = GetWeapon( "pistol_m1911" );
 
 	self GiveWeapon( spawn_weapon );
-	self SetWeaponAmmoStock( spawn_weapon, 0 );
-	self SetWeaponAmmoClip( spawn_weapon, 1 );
+	self SetWeaponAmmoClip( spawn_weapon, clipAmmo );
+	self SetWeaponAmmoStock( spawn_weapon, stockAmmo );
 	self SetSpawnWeapon( spawn_weapon );
 
 	return spawn_weapon;
