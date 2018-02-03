@@ -13,47 +13,6 @@
 
 #using scripts\mp\_util;
 
-/*
-	Deathmatch
-	Objective: 	Score points by eliminating other players
-	Map ends:	When one player reaches the score limit, or time limit is reached
-	Respawning:	No wait / Away from other players
-
-	Level requirements
-	------------------
-		Spawnpoints:
-			classname		mp_dm_spawn
-			All players spawn from these. The spawnpoint chosen is dependent on the current locations of enemies at the time of spawn.
-			Players generally spawn away from enemies.
-
-		Spectator Spawnpoints:
-			classname		mp_global_intermission
-			Spectators spawn from these and intermission is viewed from these positions.
-			Atleast one is required, any more and they are randomly chosen between.
-
-	Level script requirements
-	-------------------------
-		Team Definitions:
-			game["allies"] = "marines";
-			game["axis"] = "nva";
-			Because Deathmatch doesn't have teams with regard to gameplay or scoring, this effectively sets the available weapons.
-
-		If using minefields or exploders:
-			load::main();
-
-	Optional level script settings
-	------------------------------
-		Soldier Type and Variation:
-			game["soldiertypeset"] = "seals";
-			This sets what character models are used for each nationality on a particular map.
-
-			Valid settings:
-				soldiertypeset	seals
-*/
-
-/*QUAKED mp_dm_spawn (1.0 0.5 0.0) (-16 -16 0) (16 16 72)
-Players spawn away from enemies at one of these positions.*/
-
 #precache( "string", "OBJECTIVES_DM" );
 #precache( "string", "OBJECTIVES_DM_SCORE" );
 #precache( "string", "OBJECTIVES_DM_HINT" );
@@ -70,22 +29,16 @@ function main()
 
 	globallogic::registerFriendlyFireDelay( level.gameType, 0, 0, 1440 );
 
-	level.scoreRoundWinBased = ( GetGametypeSetting( "cumulativeRoundScores" ) == false );
-	level.teamScorePerKill = GetGametypeSetting( "teamScorePerKill" );
-	level.teamScorePerDeath = GetGametypeSetting( "teamScorePerDeath" );
-	level.teamScorePerHeadshot = GetGametypeSetting( "teamScorePerHeadshot" );
-	level.killstreaksGiveGameScore = GetGametypeSetting( "killstreaksGiveGameScore" );
-	
-	level.onStartGameType =&onStartGameType;
-	level.onPlayerKilled =&onPlayerKilled;
-	level.onSpawnPlayer =&onSpawnPlayer;
-	
+	level.onStartGameType = &onStartGameType;
+	level.onPlayerKilled = &onPlayerKilled;
+	level.onSpawnPlayer = &onSpawnPlayer;
+
 	gameobjects::register_allowed_gameobject( level.gameType );
-	
+
 	globallogic_audio::set_leader_gametype_dialog ( "startFreeForAll", "hcStartFreeForAll", "gameBoost", "gameBoost" );
 
 	// Sets the scoreboard columns and determines with data is sent across the network
-	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "kdratio", "score" ); 
+	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "kdratio", "score" );
 }
 
 
@@ -104,7 +57,7 @@ function setupTeam( team )
 
 	spawnlogic::add_spawn_points( team, "mp_dm_spawn" );
 	spawnlogic::place_spawn_points( "mp_dm_spawn_start" );
-	
+
 	level.spawn_start = spawnlogic::get_spawnpoint_array( "mp_dm_spawn_start" );
 
 }
@@ -115,7 +68,7 @@ function onStartGameType()
 
 	// now that the game objects have been deleted place the influencers
 	spawning::create_map_placed_influencers();
-	
+
 	level.spawnMins = ( 0, 0, 0 );
 	level.spawnMaxs = ( 0, 0, 0 );
 
@@ -125,48 +78,12 @@ function onStartGameType()
 	}
 
 	spawning::updateAllSpawnPoints();
-	
+
 	level.mapCenter = math::find_box_center( level.spawnMins, level.spawnMaxs );
 	setMapCenter( level.mapCenter );
 
 	spawnpoint = spawnlogic::get_random_intermission_point();
 	setDemoIntermissionPoint( spawnpoint.origin, spawnpoint.angles );
-	
-	level.displayRoundEndText = false;
-	
-	level thread onScoreCloseMusic();
-
-	if ( !util::isOneRound() )
-	{
-		level.displayRoundEndText = true;
-	}
-}
-
-function onEndGame( winningPlayer )
-{
-	if ( isdefined( winningPlayer ) && isPlayer( winningPlayer ) )
-		[[level._setPlayerScore]]( winningPlayer, winningPlayer [[level._getPlayerScore]]() + 1 );
-}
-
-function onScoreCloseMusic()
-{
-    while( !level.gameEnded )
-    {
-        scoreLimit = level.scoreLimit;
-	    scoreThreshold = scoreLimit * .9;
-        
-        for(i=0;i<level.players.size;i++)
-        {
-            scoreCheck = [[level._getPlayerScore]]( level.players[i] );
-            
-            if( scoreCheck >= scoreThreshold )
-            {
-                return;
-            }
-        }
-        
-        wait(.5);
-    }
 }
 
 function onSpawnPlayer(predictedSpawn)
@@ -175,7 +92,7 @@ function onSpawnPlayer(predictedSpawn)
 	{
 		level.useStartSpawns = false;
 	}
-	
+
 	spawning::onSpawnPlayer(predictedSpawn);
 }
 
@@ -183,14 +100,4 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 {
 	if ( !isPlayer( attacker ) || ( self == attacker ) )
 		return;
-	
-	if( !isdefined( killstreaks::get_killstreak_for_weapon( weapon ) ) || IS_TRUE( level.killstreaksGiveGameScore ) )				
-	{
-		attacker globallogic_score::givePointsToWin( level.teamScorePerKill );
-		self globallogic_score::givePointsToWin( level.teamScorePerDeath * -1 );
-		if ( sMeansOfDeath == "MOD_HEAD_SHOT" )
-		{
-			attacker globallogic_score::givePointsToWin( level.teamScorePerHeadshot );
-		}
-	}
 }

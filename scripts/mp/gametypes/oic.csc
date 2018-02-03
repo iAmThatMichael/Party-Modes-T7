@@ -11,5 +11,5 @@ function onPrecacheGameType()
 }
 
 function onStartGameType()
-{	
+{
 }
