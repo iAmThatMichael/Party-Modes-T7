@@ -1,6 +1,0 @@
-TTT	- Trouble in Terrorist Town
-OIC	- One in the Chamber
-SS	- Sharpshooter
-RUN	- Death Run
-
-OS_* - oldschool gamemodes maybe?
