@@ -1,7 +1,10 @@
 #using scripts\shared\callbacks_shared;
 #using scripts\shared\gameobjects_shared;
 #using scripts\shared\math_shared;
+#using scripts\shared\scoreevents_shared;
 #using scripts\shared\util_shared;
+
+#using scripts\shared\weapons\_weapon_utils;
 
 #insert scripts\shared\shared.gsh;
 
@@ -37,6 +40,7 @@ function main()
 	level.giveCustomLoadout = &giveCustomLoadout; // set up our loadout
 
 	level.forceAutoAssign = true; // force game to select team
+	level.oic_weapon = GetWeapon( "pistol_m1911" );
 
 	callback::on_spawned( &on_player_spawned ); // extra code on spawning
 
@@ -115,7 +119,16 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 	if ( !isPlayer( attacker ) || ( self == attacker ) )
 		return;
 
-	attacker PlayLocalSound( "mpl_oic_bullet_pickup" );
+	if ( weapon == level.oic_weapon && self.pers["clip_ammo"] < attacker.pers["clip_ammo"] )
+		scoreevents::processScoreEvent( "kill_enemy_with_more_ammo_oic", attacker, self, weapon );
+
+	if ( weapon_utils::isMeleeMOD( sMeansOfDeath ) )
+		scoreevents::processScoreEvent( "knife_with_ammo_oic", attacker, self, weapon );
+
+	if ( self.pers["lives"] == 0 )
+		scoreevents::processScoreEvent( "eliminate_oic", attacker, self, weapon );
+
+	attacker give_ammo();
 }
 
 function on_player_spawned()
@@ -123,6 +136,30 @@ function on_player_spawned()
 	/#
 	self thread m_util::spawn_bot_button();
 	#/
+	self thread weapon_fired_watcher();
+}
+
+function weapon_fired_watcher()
+{
+	self endon( "death" );
+	self endon( "disconnect" );
+
+	while ( true )
+	{
+		self waittill( "weapon_fired", weapon );
+
+		if ( weapon == level.oic_weapon )
+			self.pers["clip_ammo"] = self GetWeaponAmmoClip( level.oic_weapon );
+	}
+}
+
+function give_ammo()
+{
+	clipAmmo = self GetWeaponAmmoClip( level.oic_weapon ) + 1;
+	self SetWeaponAmmoClip( level.oic_weapon, clipAmmo );
+	self.pers["clip_ammo"] = clipAmmo;
+
+	self IPrintLn( "ammo: " + clipAmmo );
 }
 
 function giveCustomLoadout(first)
@@ -130,12 +167,12 @@ function giveCustomLoadout(first)
 	self TakeAllWeapons();
 	self ClearPerks();
 
-	clipAmmo = 1;
-	SET_IF_DEFINED( clipAmmo, self.pers["clip_ammo"] );
-	stockAmmo = 0;
-	SET_IF_DEFINED( stockAmmo, self.pers["stock_ammo"] );
+	spawn_weapon = level.oic_weapon;
 
-	spawn_weapon = GetWeapon( "pistol_m1911" );
+	clipAmmo = 1;
+	stockAmmo = 0;
+	self.pers["clip_ammo"] = clipAmmo;
+	self.pers["stock_ammo"] = stockAmmo;
 
 	self GiveWeapon( spawn_weapon );
 	self SetWeaponAmmoClip( spawn_weapon, clipAmmo );
