@@ -32,13 +32,15 @@ function main()
 	level.onStartGameType = &onStartGameType;
 	level.onPlayerKilled = &onPlayerKilled;
 	level.onSpawnPlayer = &onSpawnPlayer;
+	level.giveCustomLoadout = &giveCustomLoadout; // set up our loadout
+	level.forceAutoAssign = true; // force game to select team
 
 	gameobjects::register_allowed_gameobject( level.gameType );
 
 	globallogic_audio::set_leader_gametype_dialog ( "startFreeForAll", "hcStartFreeForAll", "gameBoost", "gameBoost" );
 
 	// Sets the scoreboard columns and determines with data is sent across the network
-	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "kdratio", "score" );
+	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "stabs", "survived" );
 }
 
 
@@ -59,7 +61,6 @@ function setupTeam( team )
 	spawnlogic::place_spawn_points( "mp_dm_spawn_start" );
 
 	level.spawn_start = spawnlogic::get_spawnpoint_array( "mp_dm_spawn_start" );
-
 }
 
 function onStartGameType()
@@ -100,4 +101,19 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 {
 	if ( !isPlayer( attacker ) || ( self == attacker ) )
 		return;
+}
+
+function giveCustomLoadout(first)
+{
+	self TakeAllWeapons();
+	self ClearPerks();
+
+	spawn_weapon = GetWeapon( "pistol_standard" );
+
+	self GiveWeapon( spawn_weapon );
+	self SetWeaponAmmoStock( spawn_weapon, 0 );
+	self SetWeaponAmmoClip( spawn_weapon, 1 );
+	self SetSpawnWeapon( spawn_weapon );
+
+	return spawn_weapon;
 }

@@ -32,6 +32,7 @@ function main()
 	level.onStartGameType = &onStartGameType;
 	level.onPlayerKilled = &onPlayerKilled;
 	level.onSpawnPlayer = &onSpawnPlayer;
+	level.forceAutoAssign = true;
 
 	gameobjects::register_allowed_gameobject( level.gameType );
 
