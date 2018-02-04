@@ -1,6 +1,10 @@
+#using scripts\shared\callbacks_shared;
 #using scripts\shared\gameobjects_shared;
 #using scripts\shared\math_shared;
+#using scripts\shared\scoreevents_shared;
 #using scripts\shared\util_shared;
+
+#using scripts\shared\weapons\_weapon_utils;
 
 #insert scripts\shared\shared.gsh;
 
@@ -9,9 +13,10 @@
 #using scripts\mp\gametypes\_globallogic_score;
 #using scripts\mp\gametypes\_spawning;
 #using scripts\mp\gametypes\_spawnlogic;
-#using scripts\mp\killstreaks\_killstreaks;
 
 #using scripts\mp\_util;
+
+#using scripts\m_shared\util_shared;
 
 #precache( "string", "OBJECTIVES_DM" );
 #precache( "string", "OBJECTIVES_DM_SCORE" );
@@ -32,14 +37,23 @@ function main()
 	level.onStartGameType = &onStartGameType;
 	level.onPlayerKilled = &onPlayerKilled;
 	level.onSpawnPlayer = &onSpawnPlayer;
+	level.giveCustomLoadout = &giveCustomLoadout; // set up our loadout
+
 	level.forceAutoAssign = true;
+
+	level.pointsPerPrimaryKill = GetGametypeSetting( "pointsPerPrimaryKill" );
+	level.pointsPerSecondaryKill = GetGametypeSetting( "pointsPerSecondaryKill" );
+	level.pointsPerPrimaryGrenadeKill = GetGametypeSetting( "pointsPerPrimaryGrenadeKill" );
+	level.pointsPerMeleeKill = GetGametypeSetting( "pointsPerMeleeKill" );
+
+	callback::on_spawned( &on_player_spawned ); // extra code on spawning
 
 	gameobjects::register_allowed_gameobject( level.gameType );
 
 	globallogic_audio::set_leader_gametype_dialog ( "startFreeForAll", "hcStartFreeForAll", "gameBoost", "gameBoost" );
 
 	// Sets the scoreboard columns and determines with data is sent across the network
-	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "kdratio", "score" );
+	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "tomahawks", "humiliated" );
 }
 
 
@@ -60,7 +74,6 @@ function setupTeam( team )
 	spawnlogic::place_spawn_points( "mp_dm_spawn_start" );
 
 	level.spawn_start = spawnlogic::get_spawnpoint_array( "mp_dm_spawn_start" );
-
 }
 
 function onStartGameType()
@@ -97,8 +110,69 @@ function onSpawnPlayer(predictedSpawn)
 	spawning::onSpawnPlayer(predictedSpawn);
 }
 
+function on_player_spawned()
+{
+	/#
+	self thread m_util::spawn_bot_button();
+	#/
+}
+
+
+function giveCustomLoadout()
+{
+	primary_weapon = GetWeapon( "special_crossbow" );
+	secondary_weapon = GetWeapon( "knife_ballistic" );
+	equipment = GetWeapon( "hatchet" );
+
+	self GiveWeapon( primary_weapon );
+	self SetWeaponAmmoClip( primary_weapon, 6 );
+	self SetWeaponAmmoStock( primary_weapon, 0 );
+
+	self GiveWeapon( secondary_weapon );
+	self SetWeaponAmmoClip( secondary_weapon, 1 );
+	self SetWeaponAmmoStock( secondary_weapon, 2 );
+
+	self GiveWeapon( equipment );
+	self SetWeaponAmmoClip( equipment, 1 );
+	self SwitchToOffHand( equipment );
+	self.grenadeTypePrimary = equipment; // satisfy _weaponobjects in order to pickup equipment
+	self.grenadeTypePrimaryCount = 1;
+
+	self SetSpawnWeapon( primary_weapon );
+
+	return primary_weapon;
+}
+
 function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, vDir, sHitLoc, psOffsetTime, deathAnimDuration )
 {
-	if ( !isPlayer( attacker ) || ( self == attacker ) )
-		return;
+	if ( IsPlayer( attacker ) && attacker != self )
+	{
+		if ( weapon_utils::isMeleeMOD( sMeansOfDeath ) )
+		{
+			attacker globallogic_score::givePointsToWin( level.pointsPerMeleeKill );
+		}
+		else if ( weapon.rootWeapon.name == "special_crossbow" )
+		{
+			attacker globallogic_score::givePointsToWin( level.pointsPerPrimaryKill );
+		}
+		else if ( weapon.rootWeapon.name == "knife_ballistic")
+		{
+			attacker globallogic_score::givePointsToWin( level.pointsPerSecondaryKill );
+		}
+		else if ( weapon.rootWeapon.name == "hatchet" )
+		{
+			scoreevents::processScoreEvent( "humiliation_gun", attacker, self, weapon );
+
+			attacker globallogic_score::givePointsToWin( level.pointsPerPrimaryGrenadeKill );
+			self globallogic_score::givePointsToWin( 0 );
+			self.pers["humiliated"]++;
+			self.humiliated = self.pers["humiliated"];
+		}
+	}
+	else
+	{
+		self globallogic_score::givePointsToWin( 0 );
+		self.pers["humiliated"]++;
+		self.humiliated = self.pers["humiliated"];
+	}
 }
