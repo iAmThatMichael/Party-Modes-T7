@@ -3,3 +3,6 @@ scripts/m_shared
 zone/*
 zone_source/*
 console_mp.log
+
+sound/*
+english/sound/*

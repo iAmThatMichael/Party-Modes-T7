@@ -28,6 +28,9 @@ scriptparsetree,scripts/mp/gametypes/sas.gsc
 // Localization
 localize,mod
 
+// Sound
+sound,mp_mod
+
 // Rawfiles
 rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg
 rawfile,gamedata/gamesettings/mp/gamesettings_shrp.cfg

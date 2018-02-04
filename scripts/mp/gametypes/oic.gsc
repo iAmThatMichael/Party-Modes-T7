@@ -10,6 +10,7 @@
 
 #using scripts\mp\gametypes\_globallogic;
 #using scripts\mp\gametypes\_globallogic_audio;
+#using scripts\mp\gametypes\_globallogic_score;
 #using scripts\mp\gametypes\_spawning;
 #using scripts\mp\gametypes\_spawnlogic;
 
@@ -33,6 +34,7 @@ function main()
 
 	globallogic::registerFriendlyFireDelay( level.gameType, 0, 0, 1440 );
 
+	level.onEndGame = &onEndGame;
 	level.onStartGameType = &onStartGameType;
 	level.onPlayerDamage = &onPlayerDamage;
 	level.onPlayerKilled = &onPlayerKilled;
@@ -41,6 +43,9 @@ function main()
 
 	level.forceAutoAssign = true; // force game to select team
 	level.oic_weapon = GetWeapon( "pistol_m1911" );
+
+	level.pointsPerMeleeKill = GetGametypeSetting( "pointsPerMeleeKill" );
+	level.pointsPerWeaponKill = GetGametypeSetting( "pointsPerWeaponKill" );
 
 	callback::on_spawned( &on_player_spawned ); // extra code on spawning
 
@@ -105,6 +110,12 @@ function onSpawnPlayer(predictedSpawn)
 	spawning::onSpawnPlayer(predictedSpawn);
 }
 
+function onEndGame( winningPlayer )
+{
+	if ( isdefined( winningPlayer ) && isPlayer( winningPlayer ) )
+		[[level._setPlayerScore]]( winningPlayer, winningPlayer [[level._getPlayerScore]]() + 1 );
+}
+
 function onPlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, sWeapon, vPoint, vDir, sHitLoc, psOffsetTime )
 {
 	// ensure damage is 1 hit
@@ -119,6 +130,8 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 	if ( !isPlayer( attacker ) || ( self == attacker ) )
 		return;
 
+	attacker globallogic_score::givePointsToWin( ( weapon_utils::isMeleeMOD( sMeansOfDeath ) ? level.pointsPerMeleeKill : level.pointsPerWeaponKill ) );
+
 	if ( weapon == level.oic_weapon && attacker.pers["clip_ammo"] < self.pers["clip_ammo"] )
 		scoreevents::processScoreEvent( "kill_enemy_with_more_ammo_oic", attacker, self, weapon );
 
@@ -126,9 +139,21 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 		scoreevents::processScoreEvent( "knife_with_ammo_oic", attacker, self, weapon );
 
 	if ( self.pers["lives"] == 0 )
+	{
 		scoreevents::processScoreEvent( "eliminate_oic", attacker, self, weapon );
+		foreach( player in level.players )
+		{
+			if ( player != self && ( IsAlive( player ) && player.pers["lives"] > 0 ) )
+			{
+				scoreevents::processScoreEvent( "survivor", player );
+				player.pers["survived"]++;
+				player.survived = player.pers["survived"];
+			}
+		}
+	}
 
 	attacker give_ammo();
+	attacker PlayLocalSound( "mod_oic_bullet_pickup" );
 }
 
 function on_player_spawned()
@@ -137,6 +162,7 @@ function on_player_spawned()
 	self thread m_util::spawn_bot_button();
 	#/
 	self thread weapon_fired_watcher();
+	self PlayLocalSound( "mod_oic_lives" + ( self.pers["lives"] - 1 ) );
 }
 
 function weapon_fired_watcher()
