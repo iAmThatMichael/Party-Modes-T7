@@ -164,10 +164,12 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 			scoreevents::processScoreEvent( "humiliation_gun", attacker, self, weapon );
 
 			attacker globallogic_score::givePointsToWin( level.pointsPerPrimaryGrenadeKill );
+
 			self globallogic_score::setPointsToWin( 0 );
 			self.pers["humiliated"]++;
 			self.humiliated = self.pers["humiliated"];
-			self PlayLocalSound( "mod_sas_bankrupt" );
+			self PlayLocalSound( "mod_wm_humiliation" );
+			attacker PlayLocalSound( "mod_wm_bankrupt" );
 		}
 	}
 	else
@@ -175,6 +177,6 @@ function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, v
 		self globallogic_score::setPointsToWin( 0 );
 		self.pers["humiliated"]++;
 		self.humiliated = self.pers["humiliated"];
-		self PlayLocalSound( "mod_sas_bankrupt" );
+		self PlayLocalSound( "mod_wm_humiliation" );
 	}
 }

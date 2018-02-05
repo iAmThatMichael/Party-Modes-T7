@@ -162,7 +162,9 @@ function on_player_spawned()
 	self thread m_util::spawn_bot_button();
 	#/
 	self thread weapon_fired_watcher();
-	self PlayLocalSound( "mod_oic_lives" + ( self.pers["lives"] - 1 ) );
+
+	if ( self.pers["lives"] == 1 )
+		self PlayLocalSound( "mod_oic_final_life" );
 }
 
 function weapon_fired_watcher()
