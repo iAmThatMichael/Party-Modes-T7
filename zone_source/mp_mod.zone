@@ -35,3 +35,8 @@ sound,mp_mod
 rawfile,gamedata/gamesettings/mp/gamesettings_oic.cfg
 rawfile,gamedata/gamesettings/mp/gamesettings_shrp.cfg
 rawfile,gamedata/gamesettings/mp/gamesettings_sas.cfg
+// --
+rawfile,ui/uieditor/menus/hud/t7hud_mp.lua
+
+// Materials
+material,mod_oic_player_life
