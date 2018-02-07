@@ -1,4 +1,5 @@
 #using scripts\shared\callbacks_shared;
+#using scripts\shared\clientfield_shared;
 #using scripts\shared\gameobjects_shared;
 #using scripts\shared\math_shared;
 #using scripts\shared\scoreevents_shared;
@@ -7,6 +8,7 @@
 #using scripts\shared\weapons\_weapon_utils;
 
 #insert scripts\shared\shared.gsh;
+#insert scripts\shared\version.gsh;
 
 #using scripts\mp\gametypes\_globallogic;
 #using scripts\mp\gametypes\_globallogic_audio;
@@ -55,6 +57,8 @@ function main()
 
 	// Sets the scoreboard columns and determines with data is sent across the network
 	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "stabs", "survived" );
+
+	clientfield::register( "clientuimodel", "hudItems.players_lives", VERSION_SHIP, 4, "int" );
 }
 
 function setupTeam( team )
@@ -127,6 +131,8 @@ function onPlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath,
 
 function onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, weapon, vDir, sHitLoc, psOffsetTime, deathAnimDuration )
 {
+	self clientfield::set_player_uimodel( "hudItems.players_lives", self.pers["lives"] );
+
 	if ( !isPlayer( attacker ) || ( self == attacker ) )
 		return;
 
@@ -162,7 +168,7 @@ function on_player_spawned()
 	self thread m_util::spawn_bot_button();
 	#/
 	self thread weapon_fired_watcher();
-
+	self clientfield::set_player_uimodel( "hudItems.players_lives", self.pers["lives"] );
 	if ( self.pers["lives"] == 1 )
 		self PlayLocalSound( "mod_oic_final_life" );
 }
