@@ -11,6 +11,7 @@ require("ui.uieditor.widgets.Scoreboard.ScoreboardWidget")
 require("ui.uieditor.widgets.Chat.inGame.IngameChatClientContainer")
 require("ui.uieditor.widgets.Scorestreaks.CallingScorestreaks.ArmDeviceWidget")
 require("ui.uieditor.widgets.Scorestreaks.CallingScorestreaks.GenericProjectedTablet")
+require("ui.uieditor.widgets.HUD.PlayerLives")
 
 local function PreLoadCallback(HudRef, InstanceRef)
 	Engine.CreateModel(Engine.GetModelForController(InstanceRef), "hudItems.combat_efficiency_enabled")
@@ -549,35 +550,11 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 	DevText.Bg:setAlpha(0.8)
 
 	HudRef:addElement(DevText)
-	HudRef.DevWins = DevText
 
-	--PlayerLives = {}
-	--for i = 0, 2 do -- hud is -640 to 640 by -360 by 360, somewhere on the edge is where we need it
-	--	local PlayerLife = LUI.UIImage.new(HudRef, InstanceRef)
-	--	PlayerLife:setLeftRight(false, true, -250 * i, -64)
-	--	PlayerLife:setTopBottom(false, true, -125 * i, -64)
-	--	PlayerLife:setImage(RegisterImage("i_mod_oic_player_life"))
-	--	PlayerLife[i] = PlayerLife
-	--	HudRef:addElement(PlayerLife)
-	--end
-
-	CoD.PlayerLifeImg = RegisterImage("i_mod_oic_player_life")
-
-	CoD.PlayerLives = {}
-	for i=0,2 do
-		-- create it
-		local PlayerLife = LUI.UIImage.new(HudRef, InstanceRef)
-		-- set the distance apart 64 units
-		PlayerLife:setLeftRight(false, false, -96 + (64 * i), -32 + (64 * i ))
-		-- set the distance apart 64 units
-		PlayerLife:setTopBottom(false, true, -64, -0)
-		-- set the image
-		PlayerLife:setImage(CoD.PlayerLifeImg)
-		-- add into hud
-		HudRef:addElement(PlayerLife)
-		-- store it
-		CoD.PlayerLives[i] = PlayerLife
-	end
+	local PlayerLivesWidget = CoD.PlayerLives.new(HudRef, InstanceRef)
+	PlayerLivesWidget:setLeftRight(true, true, 0, 0)
+	PlayerLivesWidget:setTopBottom(true, true, 0, 0)
+	HudRef:addElement(PlayerLivesWidget)
 
 	local function HudCloseCallback(SenderObj)
 		SenderObj.SafeAreaContainer:close()
