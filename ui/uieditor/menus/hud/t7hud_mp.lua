@@ -563,23 +563,21 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 
 	CoD.PlayerLifeImg = RegisterImage("i_mod_oic_player_life")
 
-	local PlayerLife = LUI.UIImage.new(HudRef, InstanceRef)
-	PlayerLife:setLeftRight(false, false, -96, -32)
-	PlayerLife:setTopBottom(false, true, -64, -0)
-	PlayerLife:setImage(CoD.PlayerLifeImg)
-	HudRef:addElement(PlayerLife)
-
-	local PlayerLife2 = LUI.UIImage.new(HudRef, InstanceRef)
-	PlayerLife2:setLeftRight(false, false, -32, 32)
-	PlayerLife2:setTopBottom(false, true, -64, -0)
-	PlayerLife2:setImage(CoD.PlayerLifeImg)
-	HudRef:addElement(PlayerLife2)
-
-	local PlayerLife3 = LUI.UIImage.new(HudRef, InstanceRef)
-	PlayerLife3:setLeftRight(false, false, 32, 96)
-	PlayerLife3:setTopBottom(false, true, -64, -0)
-	PlayerLife3:setImage(CoD.PlayerLifeImg)
-	HudRef:addElement(PlayerLife3)
+	CoD.PlayerLives = {}
+	for i=0,2 do
+		-- create it
+		local PlayerLife = LUI.UIImage.new(HudRef, InstanceRef)
+		-- set the distance apart 64 units
+		PlayerLife:setLeftRight(false, false, -96 + (64 * i), -32 + (64 * i ))
+		-- set the distance apart 64 units
+		PlayerLife:setTopBottom(false, true, -64, -0)
+		-- set the image
+		PlayerLife:setImage(CoD.PlayerLifeImg)
+		-- add into hud
+		HudRef:addElement(PlayerLife)
+		-- store it
+		CoD.PlayerLives[i] = PlayerLife
+	end
 
 	local function HudCloseCallback(SenderObj)
 		SenderObj.SafeAreaContainer:close()
