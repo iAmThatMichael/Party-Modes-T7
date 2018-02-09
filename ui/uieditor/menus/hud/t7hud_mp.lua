@@ -388,6 +388,12 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 	HudRef:addElement(ChatWidget)
 	HudRef.IngameChatClientContainer = ChatWidget
 
+	local PlayerLivesContainer = CoD.PlayerLives.new(HudRef, InstanceRef)
+	PlayerLivesContainer:setLeftRight(true, true, 0, 0)
+	PlayerLivesContainer:setTopBottom(true, true, 0, 0)
+	HudRef:addElement(PlayerLivesContainer)
+	HudRef.PlayersLives = PlayerLivesContainer
+
 	-- Begin hud state conditions, used for various Mp States (Hides a lot of stuff)
 	SafeAreaWidget.navigation = {left = ScoreWidget, down = ScoreWidget}
 	Top3Widget.navigation = {left = ScoreWidget, down = ScoreWidget}
@@ -402,6 +408,7 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 			MpScoreWidget:completeAnimation()
 			HudRef.MPScore:setAlpha(1.000000)
 			HudRef.clipFinished(MpScoreWidget, {})
+			--HudRef.PlayersLives:show()
 		end,
 		SpeedBoost = function()
 			HudRef:setupElementClipCounter(0.000000)
@@ -417,6 +424,7 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 			MpScoreWidget:completeAnimation()
 			HudRef.MPScore:setAlpha(0.000000)
 			HudRef.clipFinished(MpScoreWidget, {})
+			HudRef.PlayersLives:hide()
 		end
 	}
 
@@ -541,21 +549,6 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 		HudRef.ScoreboardWidget:processEvent({name = "gain_focus", controller = InstanceRef})
 	end
 
-	-- D3V Team logo (Only difference from stock!)
-	local DevText = CoD.TextWithBg.new(HudRef, InstanceRef)
-	DevText:setLeftRight(false, false, -118, 118)
-	DevText:setTopBottom(true, false, 20, 50)
-	DevText.Text:setText("D3V Team: L3ak Mod Demo v1.0.0")
-	DevText.Bg:setRGB(0.098, 0.098, 0.098)   -- RGBA are all specified in float range (0-1) (Byte / 255)
-	DevText.Bg:setAlpha(0.8)
-
-	HudRef:addElement(DevText)
-
-	local PlayerLivesWidget = CoD.PlayerLives.new(HudRef, InstanceRef)
-	PlayerLivesWidget:setLeftRight(true, true, 0, 0)
-	PlayerLivesWidget:setTopBottom(true, true, 0, 0)
-	HudRef:addElement(PlayerLivesWidget)
-
 	local function HudCloseCallback(SenderObj)
 		SenderObj.SafeAreaContainer:close()
 		SenderObj.ReadyEvents:close()
@@ -565,6 +558,7 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 		SenderObj.Top3PlayersScreenWidget:close()
 		SenderObj.ScoreboardWidget:close()
 		SenderObj.IngameChatClientContainer:close()
+		SenderObj.PlayerLivesContainer:close()
 
 		Engine.GetModel(Engine.GetModelForController(InstanceRef), "T7Hud_MP.buttonPrompts")
 		Engine.UnsubscribeAndFreeModel()

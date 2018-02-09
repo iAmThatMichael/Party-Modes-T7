@@ -13,9 +13,9 @@ function CoD.PlayerLives.new(PlayerLivesWidget, InstanceRef)
 		-- create it
 		local PlayerLife = LUI.UIImage.new(HudRef, InstanceRef)
 		-- set the distance apart 64 units
-		PlayerLife:setLeftRight(false, false, -96 + (64 * i), -32 + (64 * i ))
+		PlayerLife:setLeftRight(false, false, -128 + (96 * i), -32 + (96 * i ))
 		-- set the distance apart 64 units
-		PlayerLife:setTopBottom(false, true, -64, -0)
+		PlayerLife:setTopBottom(false, true, -96, -0)
 		-- set the image
 		PlayerLife:setImage(CoD.PlayerLifeImg)
 		-- add into hud
@@ -30,6 +30,7 @@ function CoD.PlayerLives.new(PlayerLivesWidget, InstanceRef)
 			PlayerLivesWidget.PlayerLives[i]:setAlpha(1)
 		end
 		for i=value,2 do
+			PlayerLivesWidget.PlayerLives[i]:beginAnimation("keyframe", 500.000000, true, true, CoD.TweenType.Linear)
 			PlayerLivesWidget.PlayerLives[i]:setAlpha(0)
 		end
 	end
