@@ -57,8 +57,8 @@ function main()
 
 	// Sets the scoreboard columns and determines with data is sent across the network
 	globallogic::setvisiblescoreboardcolumns( "pointstowin", "kills", "deaths", "stabs", "survived" );
-
-	clientfield::register( "clientuimodel", "hudItems.players_lives", VERSION_SHIP, 4, "int" );
+	// moved to lui_shared
+	//clientfield::register( "clientuimodel", "hudItems.players_lives", VERSION_SHIP, 4, "int" );
 }
 
 function setupTeam( team )

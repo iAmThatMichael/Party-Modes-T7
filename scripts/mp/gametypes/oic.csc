@@ -6,7 +6,8 @@
 
 function main()
 {
-	clientfield::register( "clientuimodel", "hudItems.players_lives", VERSION_SHIP, 4, "int", undefined, !CF_HOST_ONLY, !CF_CALLBACK_ZERO_ON_NEW_ENT );
+	// moved to lui_shared
+	//clientfield::register( "clientuimodel", "hudItems.players_lives", VERSION_SHIP, 4, "int", undefined, !CF_HOST_ONLY, !CF_CALLBACK_ZERO_ON_NEW_ENT );
 }
 
 function onPrecacheGameType()

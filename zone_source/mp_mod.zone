@@ -24,6 +24,9 @@ scriptparsetree,scripts/mp/gametypes/shrp.gsc
 // --
 scriptparsetree,scripts/mp/gametypes/sas.csc
 scriptparsetree,scripts/mp/gametypes/sas.gsc
+// --
+scriptparsetree,scripts/shared/lui_shared.csc
+scriptparsetree,scripts/shared/lui_shared.gsc
 
 // Localization
 localize,mod
