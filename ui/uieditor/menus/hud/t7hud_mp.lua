@@ -388,11 +388,11 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 	HudRef:addElement(ChatWidget)
 	HudRef.IngameChatClientContainer = ChatWidget
 
-	local PlayerLivesContainer = CoD.PlayerLives.new(HudRef, InstanceRef)
-	PlayerLivesContainer:setLeftRight(true, true, 0, 0)
-	PlayerLivesContainer:setTopBottom(true, true, 0, 0)
-	HudRef:addElement(PlayerLivesContainer)
-	HudRef.PlayersLives = PlayerLivesContainer
+	local PlayerLives = CoD.PlayerLives.new(HudRef, InstanceRef)
+	PlayerLives:setLeftRight(true, true, 0, 0)
+	PlayerLives:setTopBottom(true, true, 0, 0)
+	HudRef:addElement(PlayerLives)
+	HudRef.PlayersLivesContainer = PlayerLives
 
 	-- Begin hud state conditions, used for various Mp States (Hides a lot of stuff)
 	SafeAreaWidget.navigation = {left = ScoreWidget, down = ScoreWidget}
@@ -408,7 +408,6 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 			MpScoreWidget:completeAnimation()
 			HudRef.MPScore:setAlpha(1.000000)
 			HudRef.clipFinished(MpScoreWidget, {})
-			--HudRef.PlayersLives:show()
 		end,
 		SpeedBoost = function()
 			HudRef:setupElementClipCounter(0.000000)
@@ -424,7 +423,6 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 			MpScoreWidget:completeAnimation()
 			HudRef.MPScore:setAlpha(0.000000)
 			HudRef.clipFinished(MpScoreWidget, {})
-			HudRef.PlayersLives:hide()
 		end
 	}
 
@@ -558,7 +556,7 @@ function LUI.createMenu.T7Hud_MP(InstanceRef)
 		SenderObj.Top3PlayersScreenWidget:close()
 		SenderObj.ScoreboardWidget:close()
 		SenderObj.IngameChatClientContainer:close()
-		SenderObj.PlayerLivesContainer:close()
+		SenderObj.PlayersLivesContainer:close()
 
 		Engine.GetModel(Engine.GetModelForController(InstanceRef), "T7Hud_MP.buttonPrompts")
 		Engine.UnsubscribeAndFreeModel()
