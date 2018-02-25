@@ -194,7 +194,7 @@ function give_ammo()
 	self.pers["clip_ammo"] = clipAmmo;
 }
 
-function giveCustomLoadout(first)
+function giveCustomLoadout()
 {
 	self TakeAllWeapons();
 	self ClearPerks();
