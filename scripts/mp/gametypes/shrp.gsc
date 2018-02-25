@@ -14,6 +14,9 @@
 
 #using scripts\mp\_util;
 
+#using scripts\m_shared\array_shared;
+#using scripts\m_shared\util_shared;
+
 #precache( "string", "OBJECTIVES_DM" );
 #precache( "string", "OBJECTIVES_DM_SCORE" );
 #precache( "string", "OBJECTIVES_DM_HINT" );
@@ -25,9 +28,9 @@ function main()
 	level.pointsPerWeaponKill = GetGametypeSetting( "pointsPerWeaponKill" );
 	level.pointsPerMeleeKill = GetGametypeSetting( "pointsPerMeleeKill" );
 	level.shrpWeaponTimer = GetGametypeSetting( "weaponTimer" );
-	level.shrpWeaponNumber = GetGametypeSetting( "weaponCount" );
+	level.shrpWeaponCount = GetGametypeSetting( "weaponCount" );
 
-	util::registerTimeLimit( level.shrpWeaponNumber * level.shrpWeaponTimer / 60, level.shrpWeaponNumber * level.shrpWeaponTimer / 60 );
+	util::registerTimeLimit( level.shrpWeaponCount * level.shrpWeaponTimer / 60, level.shrpWeaponCount * level.shrpWeaponTimer / 60 );
 	util::registerScoreLimit( 0, 50000 );
 	util::registerRoundLimit( 0, 10 );
 	util::registerRoundWinLimit( 0, 10 );
@@ -38,6 +41,7 @@ function main()
 	level.onStartGameType = &onStartGameType;
 	level.onPlayerKilled = &onPlayerKilled;
 	level.onSpawnPlayer = &onSpawnPlayer;
+	level.giveCustomLoadout = &giveCustomLoadout; // set up our loadout
 	level.forceAutoAssign = true;
 
 	gameobjects::register_allowed_gameobject( level.gameType );
@@ -116,35 +120,65 @@ function shrp()
 {
 	level endon( "game_ended" );
 
-	weapon_cycle = 1;
-	total_weapon_cycles = Int( level.timeLimit * 60 / level.shrpWeaponTimer + 0.5 );
-
-	weaponIDKeys = GetArrayKeys( level.tbl_weaponIDs );
-	numWeaponIDKeys = weaponIDKeys.size;
-	gunProgressionSize = 0;
+	build_weapon_list();
 
 	if ( level.inPrematchPeriod )
 		level waittill( "prematch_over" );
 
-	IPrintLn( "Timer: " + level.shrpWeaponTimer );
-	IPrintLn( "Weapon: " + level.shrpWeaponNumber );
+	while ( level.shrpWeaponNumber != level.shrpWeaponCount )
+	{
+		level.shrpWeapon = GetWeapon( level.shrpWeaponList[level.shrpWeaponNumber] );
+		IPrintLn( level.shrpWeapon.rootWeapon.name + " | " + level.shrpWeaponNumber + " | " + level.shrpWeaponCount );
+		array::thread_all( level.activeplayers, level.giveCustomLoadout );
+		wait( level.shrpWeaponTimer );
+		level.shrpWeaponNumber++;
+	}
+}
 
-	a_grouptypes = Array( "weapon_pistol", "weapon_assault", "weapon_smg", "weapon_lmg", "weapon_sniper", "weapon_cqb", "weapon_special", "weapon_launcher", "weapon_knife" );
+function build_weapon_list()
+{
+	level.shrpWeaponList = [];
+	level.shrpWeaponNumber = 0;
 
-	while ( true )
+	a_grouptypes = Array( "weapon_pistol", "weapon_assault", "weapon_smg", "weapon_lmg", "weapon_sniper", "weapon_cqb", "weapon_special"/*, "weapon_launcher", "weapon_knife"*/ );
+
+	do
 	{
 		// pick a random weapon
-		id = array::random( level.tbl_weaponIDs );
+		id = m_array::randomized_selection( level.tbl_weaponIDs );
 		// avoid any weapon that isn't part of the group
 		if ( !IsInArray( a_grouptypes, id["group"] ) )
 			continue;
-		// avoid any nulls or dw weapons
-		if ( id[ "reference" ] == "weapon_null" || StrEndsWith( id[ "reference" ], "_dw" ) )
-			continue;
-
+		// get the weapon name
 		baseWeaponName = id[ "reference" ];
+		// avoid any nulls or dw weapons or same weapon
+		if ( IsInArray( level.shrpWeaponList, baseWeaponName ) || baseWeaponName == "weapon_null" || baseWeaponName == "ball" || baseWeaponName == "minigun" || StrEndsWith( baseWeaponName, "_dw" ) )
+			continue;
+		// get the weapon struct
+		ARRAY_ADD( level.shrpWeaponList, baseWeaponName );
+		//
+		WAIT_SERVER_FRAME;
+	} while( level.shrpWeaponList.size != level.shrpWeaponCount );
 
-		IPrintLn( "Weapon: " + baseWeaponName );
-		wait 2.5; // TEMP
+	level.shrpWeapon = GetWeapon( level.shrpWeaponList[0] );
+}
+
+function giveCustomLoadout()
+{
+	self TakeAllWeapons();
+	self ClearPerks();
+
+	spawn_weapon = level.shrpWeapon;
+
+	self GiveWeapon( spawn_weapon );
+	self GiveMaxAmmo( spawn_weapon );
+	self SetSpawnWeapon( spawn_weapon );
+	self SwitchToWeapon( spawn_weapon );
+
+	if ( level.shrpWeapon === level.weaponBallisticKnife )
+	{
+		self.grenadeTypePrimary = level.shrpWeapon; // satisfy _weaponobjects in order to pickup equipment
+		self.grenadeTypePrimaryCount = level.shrpWeapon.maxAmmo;
 	}
+	return spawn_weapon;
 }
