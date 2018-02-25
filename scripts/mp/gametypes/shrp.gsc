@@ -165,6 +165,7 @@ function build_weapon_list()
 
 function giveCustomLoadout()
 {
+	self.class_num = 0;
 	self TakeAllWeapons();
 	self ClearPerks();
 

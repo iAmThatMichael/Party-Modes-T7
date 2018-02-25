@@ -196,6 +196,7 @@ function give_ammo()
 
 function giveCustomLoadout()
 {
+	self.class_num = 0;
 	self TakeAllWeapons();
 	self ClearPerks();
 

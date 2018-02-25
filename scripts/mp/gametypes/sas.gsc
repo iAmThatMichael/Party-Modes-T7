@@ -120,6 +120,7 @@ function on_player_spawned()
 
 function giveCustomLoadout()
 {
+	self.class_num = 0;
 	primary_weapon = GetWeapon( "special_crossbow" );
 	secondary_weapon = GetWeapon( "knife_ballistic" );
 	equipment = GetWeapon( "hatchet" );
