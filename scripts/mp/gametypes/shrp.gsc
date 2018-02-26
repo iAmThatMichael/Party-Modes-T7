@@ -128,7 +128,6 @@ function shrp()
 	while ( level.shrpWeaponNumber != level.shrpWeaponCount )
 	{
 		level.shrpWeapon = GetWeapon( level.shrpWeaponList[level.shrpWeaponNumber] );
-		IPrintLn( level.shrpWeapon.rootWeapon.name + " | " + level.shrpWeaponNumber + " | " + level.shrpWeaponCount );
 		array::thread_all( level.activeplayers, level.giveCustomLoadout );
 		wait( level.shrpWeaponTimer );
 		level.shrpWeaponNumber++;
@@ -151,7 +150,7 @@ function build_weapon_list()
 			continue;
 		// get the weapon name
 		baseWeaponName = id[ "reference" ];
-		// avoid any nulls or dw weapons or same weapon
+		// avoid any invalid or same weapons
 		if ( IsInArray( level.shrpWeaponList, baseWeaponName ) || baseWeaponName == "weapon_null" || baseWeaponName == "ball" || baseWeaponName == "minigun" || StrEndsWith( baseWeaponName, "_dw" ) )
 			continue;
 		// get the weapon struct
